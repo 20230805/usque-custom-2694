@@ -1,0 +1,633 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="color-scheme" content="dark">
+  <meta name="description" content="Usque MASQUE 高级转换中心：一键注册、原生配置、多端点/多端口/SNI/DNS自定义、Clash/Mihomo智能分流、Shadowrocket、sing-box与VLESS桥接。">
+  <title>Usque MASQUE Pro 转换中心</title>
+  <link rel="stylesheet" href="./style.css?v=67">
+</head>
+<body>
+<main class="wrap pro-wrap">
+  <header class="hero pro-hero">
+    <span class="badge">v6.7 PRO · Pages + Workers 双部署</span>
+    <h1>MASQUE To Clash Pro</h1>
+    <p>Usque 一键注册 → 高级自定义 → 多格式导出 · 支持 Pages / Workers</p>
+    <div class="tip">
+      <b>本地优先：</b>原生 <code>config.json</code> 是唯一源文件。注册成功后请保存；之后改端点、端口、SNI、DNS、
+      分流或输出格式，都可以直接复用，不需要重新注册。<br>
+      <b>部署：</b>v6.7 同时提供 Cloudflare Pages 与 Workers Static Assets 两套目录。
+    </div>
+  </header>
+
+  <!-- STEP 1 -->
+  <section class="card step">
+    <div class="step-title">
+      <span class="num">1</span>
+      <div>
+        <h2>Usque 一键注册 CF / WARP MASQUE</h2>
+        <p>第一次使用完成一次即可。</p>
+      </div>
+      <span class="local-badge">本地密钥</span>
+    </div>
+
+    <div class="method-row">
+      <button class="method active" type="button">方法 1：网页一键注册（推荐）</button>
+      <label class="method upload-method">
+        <input id="masqueFileTop" type="file" accept=".json,application/json" hidden>
+        方法 2：已有 config.json
+      </label>
+      <button id="copyCli" class="method" type="button">方法 3：复制 Usque CLI 命令</button>
+    </div>
+
+    <div class="simple-grid">
+      <label>
+        <span>设备名称</span>
+        <input id="regDeviceName" value="Web-Usque" maxlength="64">
+      </label>
+      <label class="terms">
+        <input id="regTos" type="checkbox">
+        <span>我同意 Cloudflare Application Terms，并确认是本人手动单次注册。</span>
+      </label>
+    </div>
+
+    <div class="row">
+      <button id="regStart" class="primary big">🚀 一键注册</button>
+      <button id="downloadOriginal" class="save-btn" disabled>💾 下载原生 config.json</button>
+    </div>
+
+    <label class="auto-save-row">
+      <input id="autoDownloadConfig" type="checkbox" checked>
+      <span>注册成功后自动下载原生 <code>config.json</code>（推荐）</span>
+    </label>
+
+    <div id="regStatus" class="status">
+      <span class="dot"></span><span>等待开始</span>
+    </div>
+    <div id="regSummary" class="summary hidden"></div>
+  </section>
+
+  <!-- STEP 2 -->
+  <section class="card step upload-step">
+    <div class="step-title">
+      <span class="num">2</span>
+      <div>
+        <h2>原生 Usque config.json</h2>
+        <p>拖入之前保存的原生文件；注册成功后也会自动加载。</p>
+      </div>
+    </div>
+
+    <label class="drop-pro" id="configDrop">
+      <input id="masqueFile" type="file" accept=".json,application/json" hidden>
+      <span class="upload-icon">⇧</span>
+      <strong>拖放 Usque 注册生成的 .json 文件到这里</strong>
+      <small>或点击选择文件</small>
+      <span class="file-pill" id="filePill">JSON</span>
+      <div id="loadedFile" class="loaded-file hidden"></div>
+    </label>
+
+    <div class="source-actions">
+      <button id="showNative" disabled>查看原生 JSON</button>
+      <button id="copyNative" disabled>复制原生 JSON</button>
+      <button id="downloadNative2" disabled>下载原生 JSON</button>
+    </div>
+  </section>
+
+  <!-- STEP 3 -->
+  <section class="card step">
+    <div class="step-title">
+      <span class="num">3</span>
+      <div>
+        <h2>高级自定义设置</h2>
+        <p>默认已经适合新手；需要时再调整。功能覆盖你截图里的项目，并增加节点数量模式、附加 Endpoint、节点去重、健康检查、规则模式和完整操作反馈。</p>
+      </div>
+    </div>
+
+    <div class="preset-row pro-presets">
+      <button id="presetRecommended" class="preset active" type="button">⭐ 新手推荐</button>
+      <button id="presetIpv4" class="preset" type="button">IPv4 稳定</button>
+      <button id="presetIpv6" class="preset" type="button">IPv6 优先</button>
+      <button id="presetAll" class="preset" type="button">全节点测速</button>
+      <button id="presetH2" class="preset" type="button">H2 备用</button>
+    </div>
+
+    <div class="settings-grid">
+      <label>
+        <span>端点 IPv4/6</span>
+        <select id="endpointPreset">
+          <option value="auto-curated">IPv4 + IPv6 多端点自动选择（推荐）</option>
+          <option value="auto-v4">仅 IPv4 多端点自动选择</option>
+          <option value="auto-v6">仅 IPv6 多端点自动选择</option>
+          <option value="source-auto">使用 config.json 原始 Endpoint</option>
+          <option value="cf198">MASQUE1 | 162.159.198.2（主要 IPv4）</option>
+          <option value="cf199">MASQUE2 | 162.159.199.2（备用 IPv4）</option>
+          <option value="v6-103">MASQUE3 | 2606:4700:103::2（主要 IPv6）</option>
+          <option value="v6-104">MASQUE4 | 2606:4700:104::2（备用 IPv6）</option>
+          <option value="bestcf0">MASQUE5 | masque.bestcf.eu.cc（测试）</option>
+          <option value="bestcf1">MASQUE6 | masque1.bestcf.eu.cc（测试）</option>
+          <option value="bestcf2">MASQUE7 | masque2.bestcf.eu.cc（测试）</option>
+          <option value="legacy198">MASQUE8 | 162.159.198.1（兼容/旧）</option>
+          <option value="legacy199">MASQUE9 | 162.159.199.1（兼容/旧）</option>
+          <option value="custom">自定义 Endpoint</option>
+        </select>
+      </label>
+
+      <label id="customEndpointWrap" class="hidden">
+        <span>自定义 Endpoint</span>
+        <input id="customEndpoint" placeholder="IP、IPv6 或域名">
+      </label>
+
+      <label>
+        <span>端口</span>
+        <select id="portPreset">
+          <option value="recommended">随机组合 500/4500/8095/443（推荐）</option>
+          <option value="all">全部常用 443/500/1701/4500/4443/8095/8443</option>
+          <option value="443">443（默认）</option>
+          <option value="500">500</option>
+          <option value="8095">8095</option>
+          <option value="4500">4500</option>
+          <option value="4443">4443</option>
+          <option value="8443">8443</option>
+          <option value="1701">1701</option>
+          <option value="custom">自定义端口</option>
+        </select>
+      </label>
+
+      <label id="customPortWrap" class="hidden">
+        <span>自定义端口</span>
+        <input id="customPort" type="number" min="1" max="65535" value="443">
+      </label>
+
+      <label>
+        <span>SNI 域名</span>
+        <select id="sniPreset">
+          <option value="www.microsoft.com">微软 | www.microsoft.com（推荐）</option>
+          <option value="www.wikipedia.org">维基百科 | www.wikipedia.org</option>
+          <option value="www.unilever.com">联合利华 | www.unilever.com</option>
+          <option value="www.luckincoffee.com">瑞幸咖啡 | www.luckincoffee.com</option>
+          <option value="www.um.edu.mo">澳门大学 | www.um.edu.mo</option>
+          <option value="www.hku.hk">香港大学 | www.hku.hk</option>
+          <option value="www.ntu.edu.sg">南洋理工 | www.ntu.edu.sg</option>
+          <option value="www.harvard.edu">哈佛大学 | www.harvard.edu</option>
+          <option value="www.mit.edu">麻省理工 | www.mit.edu</option>
+          <option value="www.stanford.edu">斯坦福大学 | www.stanford.edu</option>
+          <option value="cdn.jsdelivr.net">CDN 分发 | cdn.jsdelivr.net</option>
+          <option value="www.speedtest.net">SpeedTest | www.speedtest.net</option>
+          <option value="www.cloudflare.com">Cloudflare 官网 | www.cloudflare.com</option>
+          <option value="speed.cloudflare.com">Cloudflare 测速 | speed.cloudflare.com</option>
+          <option value="cloudflare.dev">Cloudflare 开发者 | cloudflare.dev</option>
+          <option value="research.cloudflare.com">Cloudflare 研究团队 | research.cloudflare.com</option>
+          <option value="consumer-masque.cloudflareclient.com">MASQUE 默认 | consumer-masque.cloudflareclient.com</option>
+          <option value="zt-masque.cloudflareclient.com">ZeroTrust 默认 | zt-masque.cloudflareclient.com</option>
+          <option value="custom">自定义 SNI</option>
+        </select>
+      </label>
+
+      <label id="customSniWrap" class="hidden">
+        <span>自定义 SNI</span>
+        <input id="customSni" placeholder="example.com">
+      </label>
+
+      <label>
+        <span>DNS IPv4/6</span>
+        <select id="dnsPreset">
+          <option value="cf-google-dual">Cloudflare + Google IPv4 + IPv6（推荐）</option>
+          <option value="cf-dual">Cloudflare IPv4 + IPv6</option>
+          <option value="cf1">1.1.1.1 | Cloudflare</option>
+          <option value="google8">8.8.8.8 | Google</option>
+          <option value="quad9">9.9.9.9 | Quad9</option>
+          <option value="cf-google">1.1.1.1, 8.8.8.8 | Cloudflare + Google</option>
+          <option value="cf-quad9">1.1.1.1, 9.9.9.9 | Cloudflare + Quad9</option>
+          <option value="cf-pair">1.1.1.1, 1.0.0.1 | Cloudflare 主 + 备</option>
+          <option value="triple">1.1.1.1, 8.8.8.8, 9.9.9.9 | 三合一</option>
+          <option value="cf-backup">1.0.0.1 | Cloudflare 备用</option>
+          <option value="google-backup">8.8.4.4 | Google 备用</option>
+          <option value="quad9-backup">149.112.112.112 | Quad9 备用</option>
+          <option value="cf-v6">2606:4700:4700::1111 | Cloudflare IPv6</option>
+          <option value="google-v6">2001:4860:4860::8888 | Google IPv6</option>
+          <option value="custom">自定义 DNS 列表</option>
+        </select>
+      </label>
+
+      <label id="customDnsWrap" class="hidden">
+        <span>自定义 DNS（逗号分隔）</span>
+        <input id="customDns" placeholder="1.1.1.1,8.8.8.8">
+      </label>
+
+      <label>
+        <span>内部 IP</span>
+        <select id="innerIpMode">
+          <option value="dual">IPv4 + IPv6（推荐）</option>
+          <option value="v4">仅 IPv4</option>
+          <option value="v6">仅 IPv6</option>
+          <option value="custom">自定义内部 IP</option>
+        </select>
+      </label>
+
+      <label id="customInner4Wrap" class="hidden">
+        <span>内部 IPv4</span>
+        <input id="customInner4" placeholder="172.16.0.2/32">
+      </label>
+
+      <label id="customInner6Wrap" class="hidden">
+        <span>内部 IPv6</span>
+        <input id="customInner6" placeholder="2606:.../128">
+      </label>
+
+      <label>
+        <span>网络 / 传输</span>
+        <select id="networkMode">
+          <option value="quic">QUIC / H3（推荐）</option>
+          <option value="h2">H2 / TCP（支持 100～500 节点扩展池）</option>
+          <option value="h3-l4proxy">H3 L4Proxy（UDP 会自动关闭）</option>
+        </select>
+      </label>
+
+      <label>
+        <span>IP 栈</span>
+        <select id="stackMode">
+          <option value="auto">AUTO（推荐）</option>
+          <option value="mips">MIPS</option>
+          <option value="gvisor">gVisor</option>
+        </select>
+      </label>
+
+      <label>
+        <span>加速 / 拥塞控制</span>
+        <select id="ccMode">
+          <option value="cubic">CUBIC（默认稳定）</option>
+          <option value="bbr">BBR</option>
+          <option value="bbr3">BBR3</option>
+          <option value="reno">RENO</option>
+        </select>
+      </label>
+
+      <label>
+        <span>外层拥塞控制</span>
+        <select id="outerCc">
+          <option value="">关闭（默认）</option>
+          <option value="bbr">BBR</option>
+        </select>
+      </label>
+
+      <label>
+        <span>BBR Profile</span>
+        <select id="bbrProfile">
+          <option value="standard">standard（推荐）</option>
+          <option value="conservative">conservative</option>
+          <option value="aggressive">aggressive</option>
+        </select>
+      </label>
+
+      <label>
+        <span>MTU</span>
+        <select id="mtuPreset">
+          <option value="1280">1280（推荐）</option>
+          <option value="1360">1360</option>
+          <option value="1400">1400</option>
+          <option value="1500">1500</option>
+          <option value="custom">自定义</option>
+        </select>
+      </label>
+
+      <label id="customMtuWrap" class="hidden">
+        <span>自定义 MTU</span>
+        <input id="customMtu" type="number" min="1200" max="9000" value="1280">
+      </label>
+
+      <label>
+        <span>握手超时</span>
+        <select id="handshakeTimeout">
+          <option value="0">默认（0）</option>
+          <option value="10">10 秒</option>
+          <option value="20">20 秒</option>
+          <option value="30">30 秒</option>
+          <option value="45">45 秒</option>
+        </select>
+      </label>
+
+      <label>
+        <span>规则模式</span>
+        <select id="ruleMode">
+          <option value="smart">完整智能分流（推荐）</option>
+          <option value="lite">轻量分流（国内直连 / 国外代理）</option>
+          <option value="global">全局代理</option>
+        </select>
+      </label>
+
+      <label>
+        <span>测速 URL</span>
+        <select id="healthUrl">
+          <option value="http://cp.cloudflare.com/generate_204">Cloudflare 204（推荐）</option>
+          <option value="https://www.gstatic.com/generate_204">Google 204</option>
+          <option value="https://www.apple.com/library/test/success.html">Apple Success</option>
+        </select>
+      </label>
+      <label>
+        <span>AI 专用测速</span>
+        <select id="aiHealthMode">
+          <option value="chatgpt">ChatGPT 可达性（推荐）</option>
+          <option value="openai">OpenAI 官网</option>
+          <option value="off">关闭 AI 专用测速</option>
+        </select>
+      </label>
+
+      <label>
+        <span>测速间隔</span>
+        <select id="healthInterval">
+          <option value="300">300 秒（推荐）</option>
+          <option value="120">120 秒</option>
+          <option value="600">600 秒</option>
+          <option value="1800">1800 秒</option>
+        </select>
+      </label>
+
+      <label>
+        <span>测速容差</span>
+        <select id="healthTolerance">
+          <option value="30">30 ms</option>
+          <option value="50">50 ms</option>
+          <option value="100">100 ms</option>
+        </select>
+      </label>
+
+      <label>
+        <span>节点标识</span>
+        <input id="nodeTag" value="CDN" maxlength="24">
+      </label>
+
+      <label>
+        <span>配置名称</span>
+        <input id="profileName" value="MASQUE-Pro" maxlength="48">
+      </label>
+
+      <label>
+        <span>节点数量模式</span>
+        <select id="nodeCountMode">
+          <option value="13">精选 13 节点（推荐）</option>
+          <option value="32">增强 32 节点</option>
+          <option value="64">全量 64 节点</option>
+          <option value="100">超全量 100 节点</option>
+          <option value="custom">自定义数量</option>
+        </select>
+      </label>
+
+      <label id="customNodeCountWrap" class="hidden">
+        <span>自定义节点数量</span>
+        <input id="customNodeCount" type="number" min="1" max="500" value="100">
+      </label>
+
+      <label>
+        <span>节点生成策略</span>
+        <select id="nodeBuildMode">
+          <option value="balanced">均衡分布（推荐）</option>
+          <option value="full">Endpoint × Port 全排列</option>
+          <option value="shuffle">全排列后稳定打散</option>
+        </select>
+      </label>
+
+      <label>
+        <span>附加 Endpoint</span>
+        <input id="extraEndpoints" placeholder="可选，逗号分隔；用于扩展 64/100+ 节点">
+      </label>
+
+      <label>
+        <span>节点命名</span>
+        <select id="nodeNaming">
+          <option value="detail">标识 | 地址 | 端口（推荐）</option>
+          <option value="index">MASQUE-01 / 02 / 03</option>
+          <option value="short">地址:端口</option>
+        </select>
+      </label>
+
+      <label class="switch-pro"><input id="udpForward" type="checkbox" checked><span>UDP 转发</span></label>
+      <label class="switch-pro"><input id="remoteDns" type="checkbox" checked><span>远程 DNS</span></label>
+      <label class="switch-pro"><input id="autoSelect" type="checkbox" checked><span>自动测速选择</span></label>
+      <label class="switch-pro"><input id="showIcons" type="checkbox" checked><span>策略组图标</span></label>
+      <label class="switch-pro"><input id="adBlock" type="checkbox" checked><span>广告拦截</span></label>
+      <label class="switch-pro"><input id="includeTestEndpoints" type="checkbox" checked><span>包含测试域名 Endpoint</span></label>
+      <label class="switch-pro"><input id="dedupeNodes" type="checkbox" checked><span>节点自动去重</span></label>
+      <label class="switch-pro"><input id="h2ExtendedPool" type="checkbox" checked><span>H2 扩展地址池（100～500 节点）</span></label>
+    </div>
+
+    <div class="ai-simple-panel">
+      <div class="ai-simple-head">
+        <div>
+          <h3>🤖 ChatGPT / OpenAI 最简单出口设置</h3>
+          <p>新手推荐：ChatGPT 单独直连，其它国外流量继续使用 WARP。这样不需要运行国家检测脚本。</p>
+        </div>
+        <span class="simple-badge">推荐</span>
+      </div>
+
+      <div class="ai-simple-grid">
+        <label>
+          <span>ChatGPT / OpenAI 出口</span>
+          <select id="chatgptRouteMode">
+            <option value="DIRECT">DIRECT 直连（推荐）</option>
+            <option value="AI自动选择">WARP · AI 自动选择</option>
+            <option value="地区优选">WARP · 地区优选</option>
+            <option value="PROXY">WARP · PROXY</option>
+            <option value="AI">AI 策略组</option>
+          </select>
+        </label>
+
+        <label>
+          <span>其它 AI 服务</span>
+          <select id="otherAiRouteMode">
+            <option value="AI">继续走 AI 策略组（推荐）</option>
+            <option value="DIRECT">DIRECT</option>
+            <option value="PROXY">PROXY</option>
+            <option value="地区优选">地区优选</option>
+          </select>
+        </label>
+
+        <label class="switch-pro">
+          <input id="chatgptDirectFallback" type="checkbox" checked>
+          <span>ChatGPT 直连失败时，AI 组保留 WARP 节点供手动切换</span>
+        </label>
+      </div>
+
+      <div id="chatgptRouteHint" class="ai-simple-note">
+        当前推荐：ChatGPT/OpenAI → DIRECT；YouTube/Netflix/Google 等 → WARP。
+      </div>
+    </div>
+
+    <details class="egress-advanced">
+      <summary>🌍 高级：WARP 出口国家 / 地区检测与优选（可选）</summary>
+      <div class="egress-panel">
+      <div class="egress-title">
+        <div>
+          <h3>🌍 WARP 出口国家 / 地区检测与优选</h3>
+          <p>普通 WARP 不能向 Cloudflare 强制指定国家；这里通过本机 Mihomo API 实测每个 MASQUE 节点的真实出口，再自动选择最符合偏好的节点。</p>
+        </div>
+        <span class="egress-badge">本机检测</span>
+      </div>
+
+      <div class="settings-grid egress-grid">
+        <label>
+          <span>首选出口国家 / 地区</span>
+          <select id="egressCountry1">
+            <option value="">自动 / 不限制（推荐）</option>
+            <option value="US">🇺🇸 美国 US</option>
+            <option value="SG">🇸🇬 新加坡 SG</option>
+            <option value="JP">🇯🇵 日本 JP</option>
+            <option value="HK">🇭🇰 香港 HK</option>
+            <option value="TW">🇹🇼 台湾 TW</option>
+            <option value="KR">🇰🇷 韩国 KR</option>
+            <option value="GB">🇬🇧 英国 GB</option>
+            <option value="DE">🇩🇪 德国 DE</option>
+            <option value="FR">🇫🇷 法国 FR</option>
+            <option value="NL">🇳🇱 荷兰 NL</option>
+            <option value="CA">🇨🇦 加拿大 CA</option>
+            <option value="AU">🇦🇺 澳大利亚 AU</option>
+          </select>
+        </label>
+
+        <label>
+          <span>备用出口 1</span>
+          <select id="egressCountry2">
+            <option value="">无</option>
+            <option value="US">🇺🇸 美国 US</option>
+            <option value="SG">🇸🇬 新加坡 SG</option>
+            <option value="JP">🇯🇵 日本 JP</option>
+            <option value="HK">🇭🇰 香港 HK</option>
+            <option value="TW">🇹🇼 台湾 TW</option>
+            <option value="KR">🇰🇷 韩国 KR</option>
+            <option value="GB">🇬🇧 英国 GB</option>
+            <option value="DE">🇩🇪 德国 DE</option>
+            <option value="FR">🇫🇷 法国 FR</option>
+            <option value="NL">🇳🇱 荷兰 NL</option>
+            <option value="CA">🇨🇦 加拿大 CA</option>
+            <option value="AU">🇦🇺 澳大利亚 AU</option>
+          </select>
+        </label>
+
+        <label>
+          <span>备用出口 2</span>
+          <select id="egressCountry3">
+            <option value="">无</option>
+            <option value="US">🇺🇸 美国 US</option>
+            <option value="SG">🇸🇬 新加坡 SG</option>
+            <option value="JP">🇯🇵 日本 JP</option>
+            <option value="HK">🇭🇰 香港 HK</option>
+            <option value="TW">🇹🇼 台湾 TW</option>
+            <option value="KR">🇰🇷 韩国 KR</option>
+            <option value="GB">🇬🇧 英国 GB</option>
+            <option value="DE">🇩🇪 德国 DE</option>
+            <option value="FR">🇫🇷 法国 FR</option>
+            <option value="NL">🇳🇱 荷兰 NL</option>
+            <option value="CA">🇨🇦 加拿大 CA</option>
+            <option value="AU">🇦🇺 澳大利亚 AU</option>
+          </select>
+        </label>
+
+        <label>
+          <span>Mihomo Controller</span>
+          <input id="controllerUrl" value="http://127.0.0.1:9090" placeholder="http://127.0.0.1:9090">
+        </label>
+
+        <label>
+          <span>Controller Secret</span>
+          <input id="controllerSecret" type="password" value="" placeholder="没有就留空">
+        </label>
+
+        <label>
+          <span>本地 Mixed Proxy</span>
+          <input id="localProxyUrl" value="http://127.0.0.1:7890" placeholder="http://127.0.0.1:7890">
+        </label>
+
+        <label class="switch-pro"><input id="egressChatgptFirst" type="checkbox" checked><span>优先 ChatGPT 可达节点</span></label>
+        <label class="switch-pro"><input id="egressApplyAll" type="checkbox"><span>将优选出口应用到全部服务分组</span></label>
+        <label class="switch-pro"><input id="enableControllerApi" type="checkbox" checked><span>生成 Clash 时启用本机 Controller API</span></label>
+      </div>
+
+      <div class="egress-note">
+        <b>工作方式：</b>先运行生成的 Clash/Mihomo 配置，再运行下载的检测脚本。脚本会逐个切换隐藏的“出口检测”组，
+        通过本地代理访问 Cloudflare Trace / IP 信息接口，记录实际出口国家、地区、IP、PoP、延迟，并测试 ChatGPT HTTP 可达性。
+        最后把“地区优选”和 AI / PROXY 组切换到最佳候选。它只能在现有 WARP 出口里选择，不能创造 Cloudflare 没有分配给你的国家出口。
+      </div>
+
+      <div class="row">
+        <button id="downloadEgressScanner" class="primary" type="button">⬇ 下载出口检测脚本</button>
+        <button id="downloadEgressBat" type="button">⬇ 下载 Windows 一键检测 BAT</button>
+        <button id="downloadEgressConfig" type="button">⬇ 下载出口偏好 JSON</button>
+      </div>
+    </div>
+    </details>
+
+    <div id="nodeEstimate" class="estimate">预计生成：13 个节点</div>
+
+    <div class="row">
+      <button id="applySettings" class="primary">应用设置并重新生成</button>
+      <button id="resetSettings">恢复推荐设置</button>
+    </div>
+    <div id="settingsStatus" class="settings-status clean">
+      <span class="settings-status-dot"></span>
+      <span id="settingsStatusText">当前设置已应用</span>
+    </div>
+  </section>
+
+  <!-- STEP 4 -->
+  <section class="card step">
+    <div class="step-title">
+      <span class="num">4</span>
+      <div>
+        <h2>转换 / 导出</h2>
+        <p>同一份原生 Usque 配置可以随时切换输出格式。</p>
+      </div>
+    </div>
+
+    <div class="format-grid pro-format-grid">
+      <button id="fmtNative" class="format-card active" disabled>
+        <span class="format-icon">📦</span><strong>原生 Usque</strong><small>config.json</small>
+      </button>
+      <button id="fmtClash" class="format-card" disabled>
+        <span class="format-icon">⚡</span><strong>Clash / Mihomo</strong><small>全平台 · 智能分流</small>
+      </button>
+      <button id="fmtShadowrocket" class="format-card" disabled>
+        <span class="format-icon">🚀</span><strong>小火箭 iOS</strong><small>Shadowrocket 2.2.90+</small>
+      </button>
+      <button id="fmtSingbox" class="format-card" disabled>
+        <span class="format-icon">🧩</span><strong>sing-box</strong><small>官方版兼容桥接</small>
+      </button>
+      <button id="fmtVless" class="format-card" disabled>
+        <span class="format-icon">🔗</span><strong>VLESS</strong><small>本地桥接格式</small>
+      </button>
+    </div>
+
+    <div id="compatNotice" class="compat-notice hidden"></div>
+
+    <div class="panel-head">
+      <div>
+        <h3 id="outputTitle">原生 Usque config.json</h3>
+        <p id="outputDesc">注册或导入后显示。</p>
+      </div>
+      <div class="row tight">
+        <button id="copyMain" disabled>复制</button>
+        <button id="downloadMain" disabled>下载</button>
+        <button id="downloadHelper" class="hidden">下载辅助配置</button>
+        <button id="downloadVlessBat" class="hidden">下载 Windows 一键启动 BAT</button>
+      </div>
+    </div>
+
+    <textarea id="mainOutput" readonly spellcheck="false"
+      placeholder="先完成注册，或导入已有 config.json"></textarea>
+
+    <div id="runGuide" class="run-guide hidden">
+      <h3>使用说明</h3>
+      <pre id="runCommands"></pre>
+    </div>
+  </section>
+
+  <footer>
+    <p>注册时只通过你自己的 Pages API 转发 Cloudflare WARP 请求；MASQUE 私钥由浏览器本地 WebCrypto 生成。</p>
+  </footer>
+</main>
+
+<div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
+
+<script src="./usque-register.js?v=67"></script>
+<script src="./app.js?v=67"></script>
+</body>
+</html>

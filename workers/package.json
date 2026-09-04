@@ -1,0 +1,13 @@
+{
+  "name": "usque-masque-pro-v67",
+  "private": true,
+  "version": "6.7.0",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "check": "node --check src/worker.js"
+  },
+  "devDependencies": {
+    "wrangler": "latest"
+  }
+}
