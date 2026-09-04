@@ -3,7 +3,7 @@
 > 基于 Cloudflare WARP / MASQUE 的可视化注册、配置生成与多客户端转换工具。  
 > 支持 **Cloudflare Pages + Cloudflare Workers 双部署**，浏览器完成 Usque 注册、原生配置保存、MASQUE 多节点生成、Clash/Mihomo 智能分流、Shadowrocket、sing-box、本地 VLESS 桥接，以及可选的 WARP 出口检测。
 >
-> # YouTube视频教程
+> # YouTube视频教程 [点击查看]https://youtu.be/fxFDAizaXHc
 
 ---
 
