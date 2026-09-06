@@ -32,40 +32,27 @@ const DNS_PRESETS={
 const CLASH_DOMAIN_RULESETS=[
 ["bilibili","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/bilibili.mrs"],
 ["cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"],
-["tiktok","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"],
+["category-ai-!cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs"],
+["youtube","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"],
 ["netflix","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/netflix.mrs"],
 ["disney","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/disney.mrs"],
 ["spotify","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/spotify.mrs"],
-["github","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/github.mrs"],
+["tiktok","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/tiktok.mrs"],
+["primevideo","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/primevideo.mrs"],
+["hbo","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/hbo.mrs"],
 ["emby","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-emby.mrs"],
 ["telegram","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/telegram.mrs"],
-["youtube","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"],
-["google","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/google.mrs"],
-["twitter","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/twitter.mrs"],
-["instagram","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/instagram.mrs"],
-["facebook","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/facebook.mrs"],
-["steam@cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam@cn.mrs"],
-["steam","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/steam.mrs"],
-["apple@cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple@cn.mrs"],
-["apple","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple.mrs"],
-["microsoft@cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft@cn.mrs"],
 ["microsoft","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/microsoft.mrs"],
-["xbox","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/xbox.mrs"],
-["playstation","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/playstation.mrs"],
-["nintendo@cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/nintendo@cn.mrs"],
-["nintendo","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/nintendo.mrs"],
-["category-porn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-porn.mrs"],
-["category-ai-!cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ai-!cn.mrs"],
+["apple","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/apple.mrs"],
+["cloudflare","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cloudflare.mrs"],
 ["geolocation-!cn","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/geolocation-!cn.mrs"],
 ["category-ads-all","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/category-ads-all.mrs"]
 ];
 const CLASH_IP_RULESETS=[
 ["private_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/private.mrs"],
-["apple_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/apple.mrs"],
-["google_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/google.mrs"],
-["telegram_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/telegram.mrs"],
 ["netflix_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/netflix.mrs"],
-["twitter_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/twitter.mrs"],
+["telegram_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/telegram.mrs"],
+["cloudflare_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/cloudflare.mrs"],
 ["cn_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/cn.mrs"],
 ["ad_ip","https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geoip/ad.mrs"]
 ];
@@ -128,6 +115,44 @@ function pemBody(v){return String(v||"").replace(/-----BEGIN PUBLIC KEY-----/g,"
 function cidr4(v){return !v?"":String(v).includes("/")?String(v):String(v)+"/32"}
 function cidr6(v){return !v?"":String(v).includes("/")?String(v):String(v)+"/128"}
 function uniq(a){return [...new Set(a.filter(Boolean))]}
+
+const CUSTOM_IP_TARGETS=new Set(["US","JP","SG","HK","TW","KR","FREE","WARP","DIRECT"]);
+function normalizeCustomIpTarget(v){
+ const t=String(v||"").trim().toUpperCase();
+ const aliases={"免费":"FREE","免费自动":"FREE","自动":"FREE","直连":"DIRECT","美国":"US","日本":"JP","新加坡":"SG","香港":"HK","台湾":"TW","韩国":"KR"};
+ return aliases[t]||t;
+}
+function normalizeIpCidr(v){
+ let s=String(v||"").trim();
+ if(!s)return "";
+ if(s.includes(":"))return s.includes("/")?s:s+"/128";
+ if(/^\d{1,3}(?:\.\d{1,3}){3}(?:\/\d{1,2})?$/.test(s))return s.includes("/")?s:s+"/32";
+ return "";
+}
+function parseCustomIpRules(text){
+ const rules=[],errors=[];
+ String(text||"").split(/\r?\n/).forEach((raw,idx)=>{
+   const line=raw.trim();
+   if(!line||line.startsWith("#"))return;
+   const m=line.match(/^(.+?)\s*(?:=>|,|，|\s+)\s*([^\s,，]+)\s*$/);
+   if(!m){errors.push(`第 ${idx+1} 行格式错误：${line}`);return}
+   const cidr=normalizeIpCidr(m[1]),target=normalizeCustomIpTarget(m[2]);
+   if(!cidr){errors.push(`第 ${idx+1} 行 IP/CIDR 无效：${m[1]}`);return}
+   if(!CUSTOM_IP_TARGETS.has(target)){errors.push(`第 ${idx+1} 行目标无效：${m[2]}`);return}
+   rules.push({cidr,target});
+ });
+ return {rules,errors,countries:uniq(rules.map(r=>["US","JP","SG","HK","TW","KR"].includes(r.target)?r.target:"") )};
+}
+function customCountryGroup(code){
+ const meta=FREE_COUNTRY_META[code]||{flag:"🌐"};
+ return `${meta.flag} ${code}落地`;
+}
+function customIpTargetGroup(target){
+ if(["US","JP","SG","HK","TW","KR"].includes(target))return customCountryGroup(target);
+ if(target==="FREE")return "⚡ 免费落地自动";
+ if(target==="WARP")return "🚀 WARP自动";
+ return "DIRECT";
+}
 
 function parseUsque(text){
  const d=JSON.parse(text);
@@ -371,6 +396,11 @@ function innerIps(){
  };
 }
 function opts(){
+ const customParsed=parseCustomIpRules($("customIpRoutingRules")?.value||"");
+ const baseFreeCountries=[
+   $("freeUS").checked?"US":"",$("freeJP").checked?"JP":"",$("freeSG").checked?"SG":"",
+   $("freeHK").checked?"HK":"",$("freeTW").checked?"TW":"",$("freeKR").checked?"KR":""
+ ].filter(Boolean);
  return {
   sni:selectedSni(),dns:selectedDns(),mtu:selectedMtu(),network:$("networkMode").value,
   stack:$("stackMode").value,cc:$("ccMode").value,outerCc:$("outerCc").value,bbrProfile:$("bbrProfile").value,
@@ -388,6 +418,14 @@ function opts(){
   controllerUrl:$("controllerUrl").value.trim()||"http://127.0.0.1:9090",
   controllerSecret:$("controllerSecret").value,
   localProxyUrl:$("localProxyUrl").value.trim()||"http://127.0.0.1:7890",
+  freeEnabled:$("freeEgressEnabled").checked,
+  freeUseWarp:$("freeUseWarp").checked,
+  freeScope:$("freeScope").value,
+  freeProtocolMode:$("freeProtocolMode").value,
+  freeCountries:uniq([...baseFreeCountries,...($("customIpRoutingEnabled")?.checked?customParsed.countries:[])]),
+  customIpEnabled:$("customIpRoutingEnabled")?.checked||false,
+  customIpRules:customParsed.rules,
+  customIpErrors:customParsed.errors,
   profile:$("profileName").value.trim()||"MASQUE-Pro"
  };
 }
@@ -519,10 +557,107 @@ function aiHealthUrl(mode){
  return "https://chatgpt.com/";
 }
 
+const FREE_COUNTRY_META={
+ US:{flag:"🇺🇸",name:"美国"},JP:{flag:"🇯🇵",name:"日本"},SG:{flag:"🇸🇬",name:"新加坡"},
+ HK:{flag:"🇭🇰",name:"香港"},TW:{flag:"🇹🇼",name:"台湾"},KR:{flag:"🇰🇷",name:"韩国"}
+};
+function freeProviderId(code,kind="general"){return `FREE-${code}-${kind.toUpperCase()}`}
+function freeProviderUrl(code){
+ return `https://raw.githubusercontent.com/Au1rxx/free-vpn-subscriptions/main/output/by-country/clash-${code}.yaml`;
+}
+function freeForService(o,name){
+ if(!o.freeEnabled||!o.freeCountries.length)return false;
+ const s=o.freeScope||"ai-streaming";
+ if(s==="all-foreign")return name!=="Bilibili";
+ if(s==="ai-only")return name==="AI";
+ if(s==="streaming-only")return ["Netflix","Disney","TikTok","Spotify","PrimeVideo","HBO","Emby"].includes(name);
+ return ["AI","Netflix","Disney","TikTok","Spotify","PrimeVideo","HBO","Emby"].includes(name);
+}
+function freeGroupEntries(name){
+ if(name==="AI")return ["🤖 AI自动优选","🌍 免费落地可手动"];
+ if(["Netflix","Disney","TikTok","Spotify","PrimeVideo","HBO","Emby"].includes(name))return ["🎬 流媒体自动优选","🌍 免费落地可手动"];
+ return ["⚡ 免费落地自动","🌍 免费落地可手动"];
+}
+function providerHealth(kind){
+ if(kind==="ai")return {
+   url:"https://chatgpt.com/",
+   expected:"200-399",
+   interval:120,
+   timeout:9000
+ };
+ if(kind==="stream")return {
+   url:"https://www.netflix.com/",
+   expected:"200-399",
+   interval:120,
+   timeout:9000
+ };
+ return {
+   url:"https://www.gstatic.com/generate_204",
+   expected:"204",
+   interval:120,
+   timeout:5000
+ };
+}
+function appendOneFreeProvider(a,o,code,kind){
+ const meta=FREE_COUNTRY_META[code]||{flag:"🌐",name:code};
+ const hc=providerHealth(kind);
+ const pid=freeProviderId(code,kind);
+ a.push(
+   `  ${pid}:`,
+   "    type: http",
+   `    url: ${q(freeProviderUrl(code))}`,
+   `    path: ${q(`./providers/free-${code}-${kind}.yaml`)}`,
+   "    interval: 3600",
+   "    size-limit: 8388608"
+ );
+ if(o.freeUseWarp)a.push('    proxy: "WARP中转"');
+ if(o.freeProtocolMode==="stable"){
+   a.push('    exclude-type: "hysteria2|tuic|wireguard|http|https|socks4|socks5"');
+ }
+ a.push(
+   "    health-check:",
+   "      enable: true",
+   `      url: ${q(hc.url)}`,
+   `      expected-status: ${q(hc.expected)}`,
+   `      interval: ${hc.interval}`,
+   `      timeout: ${hc.timeout}`,
+   "      lazy: false",
+   "    override:",
+   `      additional-prefix: ${q(`${meta.flag} ${code} | `)}`
+ );
+ if(o.freeUseWarp)a.push('      dialer-proxy: "WARP中转"');
+}
+function appendFreeProviders(a,o){
+ if(!o.freeEnabled)return;
+ if(!o.freeCountries.length)throw new Error("已启用免费落地，但没有选择任何国家/地区");
+ a.push("","proxy-providers:");
+ for(const code of o.freeCountries){
+   // Same source, three independent health gates:
+   // general = basic connectivity, ai = ChatGPT reachability, stream = Netflix reachability.
+   appendOneFreeProvider(a,o,code,"general");
+   appendOneFreeProvider(a,o,code,"ai");
+   appendOneFreeProvider(a,o,code,"stream");
+ }
+}
+function appendProviderUse(a,o,kind="general",indent="      "){
+ for(const code of o.freeCountries)a.push(`${indent}- ${q(freeProviderId(code,kind))}`);
+}
+
+function countryRuleName(code){
+ const meta=FREE_COUNTRY_META[code]||{flag:"🌐"};
+ return `${meta.flag} ${code}`;
+}
+function appendCountryChoices(a,o,indent="      "){
+ for(const code of o.freeCountries)a.push(`${indent}- ${q(countryRuleName(code))}`);
+}
+
 function appendServiceSelector(a,name,names,o,{directFirst=false}={}){
  groupHeader(a,name);
  a.push("    proxies:");
  if(directFirst)a.push("      - DIRECT");
+ if(freeForService(o,name)){
+   for(const n of freeGroupEntries(name))a.push(`      - ${q(n)}`);
+ }
  if(name==="AI" && o.aiHealth!=="off")a.push('      - "AI自动选择"');
  a.push('      - "地区优选"');
  if(o.autoSelect)a.push('      - "自动选择"');
@@ -531,86 +666,224 @@ function appendServiceSelector(a,name,names,o,{directFirst=false}={}){
  if(!directFirst)a.push("      - DIRECT");
 }
 
+function appendCustomIpRules(a,o){
+ if(!o.customIpEnabled||!o.customIpRules.length)return;
+ a.push("  # Custom IP / CIDR routing");
+ for(const r of o.customIpRules){
+   const kind=r.cidr.includes(":")?"IP-CIDR6":"IP-CIDR";
+   a.push(`  - ${kind},${r.cidr},${customIpTargetGroup(r.target)},no-resolve`);
+ }
+ a.push("");
+}
+
 function clashGroupsAndRules(names,o){
  const a=["","proxy-groups:"];
+ const freeOn=o.freeEnabled&&o.freeCountries.length>0;
 
- // Hidden selector used by the local egress scanner. Its choice can be changed
- // through Mihomo's localhost REST API without affecting normal service groups.
- groupHeader(a,"出口检测");
- a.push("    hidden: true","    proxies:");
+ groupHeader(a,"🚀 WARP自动","url-test");
+ a.push(
+   "    hidden: true",
+   `    url: ${q(o.healthUrl)}`,
+   `    interval: ${Math.min(Number(o.healthInterval)||300,180)}`,
+   `    tolerance: ${Math.min(Number(o.tolerance)||30,40)}`,
+   "    timeout: 5000","    lazy: false","    max-failed-times: 2","    proxies:"
+ );
  appendRawNodes(a,names);
 
- // Visible selector that the scanner pins to the best real egress candidate.
- groupHeader(a,"地区优选");
+ groupHeader(a,"🌎 WARP可手动");
+ a.push("    proxies:",'      - "🚀 WARP自动"');
+ appendRawNodes(a,names);
+
+ groupHeader(a,"WARP中转");
+ a.push("    hidden: true","    proxies:",'      - "🚀 WARP自动"','      - "🌎 WARP可手动"');
+
+ if(freeOn){
+   groupHeader(a,"⚡ 免费落地自动","url-test");
+   a.push(
+     "    hidden: true","    url: https://www.gstatic.com/generate_204","    expected-status: 204",
+     "    interval: 120","    tolerance: 30","    timeout: 5000","    lazy: false","    max-failed-times: 2","    use:"
+   );
+   appendProviderUse(a,o,"general");
+
+   groupHeader(a,"🤖 AI自动优选","url-test");
+   a.push(
+     "    hidden: true","    url: https://chatgpt.com/","    expected-status: 200-399",
+     "    interval: 120","    tolerance: 30","    timeout: 9000","    lazy: false","    max-failed-times: 2","    use:"
+   );
+   appendProviderUse(a,o,"ai");
+
+   groupHeader(a,"🎬 流媒体自动优选","url-test");
+   a.push(
+     "    hidden: true","    url: https://www.netflix.com/","    expected-status: 200-399",
+     "    interval: 120","    tolerance: 30","    timeout: 9000","    lazy: false","    max-failed-times: 2","    use:"
+   );
+   appendProviderUse(a,o,"stream");
+
+   groupHeader(a,"🌍 免费落地可手动");
+   a.push("    proxies:",'      - "🤖 AI自动优选"','      - "🎬 流媒体自动优选"','      - "⚡ 免费落地自动"',"    use:");
+   appendProviderUse(a,o,"general");
+
+   // Only countries checked on the web panel are generated.
+   for(const code of o.freeCountries){
+     groupHeader(a,countryRuleName(code),"url-test");
+     a.push(
+       "    hidden: true",
+       "    url: https://www.gstatic.com/generate_204","    expected-status: 204",
+       "    interval: 120","    tolerance: 20","    timeout: 5000","    lazy: false","    max-failed-times: 2",
+       "    use:",`      - ${q(freeProviderId(code,"general"))}`
+     );
+   }
+ }
+
+ // Reference-style common strategies
+ groupHeader(a,"♻️ 自动选择","url-test");
+ a.push(
+   "    url: https://www.gstatic.com/generate_204","    expected-status: 204",
+   "    interval: 120","    tolerance: 20","    timeout: 5000","    lazy: false","    max-failed-times: 2","    proxies:"
+ );
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🚀 WARP自动"');
+
+ groupHeader(a,"🛡️ 故障转移","fallback");
+ a.push(
+   "    url: https://www.gstatic.com/generate_204","    expected-status: 204",
+   "    interval: 60","    timeout: 5000","    lazy: false","    max-failed-times: 1","    proxies:"
+ );
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🚀 WARP自动"');
+
+ groupHeader(a,"⚖️ 负载均衡","load-balance");
+ a.push(
+   "    strategy: consistent-hashing",
+   "    url: https://www.gstatic.com/generate_204","    interval: 180","    timeout: 5000","    lazy: false"
+ );
+ if(freeOn){
+   a.push("    use:");
+   appendProviderUse(a,o,"general");
+ }else{
+   a.push("    proxies:",'      - "🚀 WARP自动"');
+ }
+
+ groupHeader(a,"🚀 节点选择");
+ a.push("    proxies:",'      - "♻️ 自动选择"','      - "🛡️ 故障转移"','      - "⚖️ 负载均衡"');
+ if(freeOn)appendCountryChoices(a,o);
+ if(freeOn)a.push('      - "🌍 免费落地可手动"');
+ a.push('      - "🌎 WARP可手动"','      - "🚀 WARP自动"',"      - DIRECT");
+
+ groupHeader(a,"🎯 全球直连");
+ a.push("    proxies:","      - DIRECT");
+
+ groupHeader(a,"🛑 全球拦截");
+ a.push("    proxies:","      - REJECT","      - REJECT-DROP");
+
+ // AI
+ groupHeader(a,"🤖 AI");
  a.push("    proxies:");
+ if(freeOn&&freeForService(o,"AI"))a.push('      - "🤖 AI自动优选"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🚀 节点选择"');
+ if(freeOn)a.push('      - "🌍 免费落地可手动"');
+ a.push('      - "🌎 WARP可手动"','      - "🎯 全球直连"');
+
+ // Streaming
+ groupHeader(a,"🎬 流媒体");
+ a.push("    proxies:");
+ if(freeOn)a.push('      - "🎬 流媒体自动优选"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🚀 节点选择"');
+ if(freeOn)a.push('      - "🌍 免费落地可手动"');
+ a.push('      - "🌎 WARP可手动"','      - "🎯 全球直连"');
+
+ // YouTube stays speed-first by default.
+ groupHeader(a,"⚡ YouTube-WARP极速","url-test");
+ a.push(
+   "    hidden: true","    url: https://www.gstatic.com/generate_204","    expected-status: 204",
+   "    interval: 60","    tolerance: 10","    timeout: 4000","    lazy: false","    max-failed-times: 1","    proxies:"
+ );
  appendRawNodes(a,names);
- a.push("      - DIRECT");
 
- if(o.autoSelect){
-   groupHeader(a,"自动选择","url-test");
+ if(freeOn){
+   groupHeader(a,"⚡ YouTube-免费极速","url-test");
    a.push(
-     `    url: ${q(o.healthUrl)}`,
-     `    interval: ${o.healthInterval}`,
-     `    tolerance: ${o.tolerance}`,
-     "    timeout: 5000",
-     "    lazy: true",
-     "    proxies:"
+     "    hidden: true","    url: https://www.gstatic.com/generate_204","    expected-status: 204",
+     "    interval: 60","    tolerance: 10","    timeout: 5000","    lazy: false","    max-failed-times: 1","    use:"
    );
-   appendRawNodes(a,names);
+   appendProviderUse(a,o,"general");
  }
 
- if(o.aiHealth!=="off"){
-   groupHeader(a,"AI自动选择","url-test");
-   a.push(
-     `    url: ${q(aiHealthUrl(o.aiHealth))}`,
-     "    expected-status: 200-399",
-     `    interval: ${Math.max(300,o.healthInterval)}`,
-     `    tolerance: ${Math.max(50,o.tolerance)}`,
-     "    timeout: 8000",
-     "    lazy: false",
-     "    proxies:"
-   );
-   appendRawNodes(a,names);
+ groupHeader(a,"▶️ YouTube高速");
+ a.push("    proxies:",'      - "⚡ YouTube-WARP极速"');
+ if(freeOn){
+   a.push('      - "⚡ YouTube-免费极速"');
+   appendCountryChoices(a,o);
  }
+ a.push('      - "🚀 节点选择"','      - "🌎 WARP可手动"','      - "🎯 全球直连"');
+
+ // Reference-style service groups
+ groupHeader(a,"✈️ 电报信息");
+ a.push("    proxies:",'      - "🚀 节点选择"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "♻️ 自动选择"','      - "🌎 WARP可手动"','      - "🎯 全球直连"');
+
+ groupHeader(a,"Ⓜ️ 微软服务");
+ a.push("    proxies:",'      - "🎯 全球直连"','      - "🚀 节点选择"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "♻️ 自动选择"','      - "🌎 WARP可手动"');
+
+ groupHeader(a,"🍎 苹果服务");
+ a.push("    proxies:",'      - "🚀 节点选择"','      - "🎯 全球直连"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "♻️ 自动选择"','      - "🌎 WARP可手动"');
+
+ groupHeader(a,"☁️ CloudflareCDN");
+ a.push("    proxies:",'      - "🚀 节点选择"','      - "♻️ 自动选择"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🌎 WARP可手动"','      - "🎯 全球直连"');
+
+ groupHeader(a,"🌐 国外网站");
+ a.push("    proxies:",'      - "🚀 WARP自动"','      - "🚀 节点选择"','      - "♻️ 自动选择"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🌎 WARP可手动"','      - "🎯 全球直连"');
+
+ groupHeader(a,"🐟 漏网之鱼");
+ a.push("    proxies:",'      - "🚀 节点选择"','      - "♻️ 自动选择"');
+ if(freeOn)appendCountryChoices(a,o);
+ a.push('      - "🌎 WARP可手动"','      - "🎯 全球直连"');
 
  groupHeader(a,"PROXY");
- a.push("    proxies:");
- a.push('      - "地区优选"');
- if(o.aiHealth!=="off")a.push('      - "AI自动选择"');
- if(o.autoSelect)a.push('      - "自动选择"');
- appendRawNodes(a,names);
- a.push("      - DIRECT");
+ a.push("    hidden: true","    proxies:",'      - "🚀 节点选择"','      - "🌐 国外网站"','      - "🚀 WARP自动"',"      - DIRECT");
 
  if(o.ruleMode==="global"){
-   a.push("","rules:","  - MATCH,PROXY","");
+   a.push("","rules:","  - MATCH,🚀 节点选择","");
    return a;
  }
 
  if(o.ruleMode==="lite"){
-   appendServiceSelector(a,"国外网站",names,o);
    a.push(
      "","rule-providers:",
-     "  cn:","    type: http","    behavior: domain","    format: mrs",
-     "    interval: 43200",
-     "    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs",
-     "  cn_ip:","    type: http","    behavior: ipcidr","    format: mrs",
-     "    interval: 43200",
-     "    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/cn.mrs",
+     "  cn:","    type: http","    behavior: domain","    format: mrs","    interval: 43200",
+     "    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/cn.mrs"
+   );
+   if(freeOn&&o.freeUseWarp)a.push('    proxy: "WARP中转"');
+   a.push(
+     "  cn_ip:","    type: http","    behavior: ipcidr","    format: mrs","    interval: 43200",
+     "    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo-lite/geoip/cn.mrs"
+   );
+   if(freeOn&&o.freeUseWarp)a.push('    proxy: "WARP中转"');
+   a.push(
+     "  youtube:","    type: http","    behavior: domain","    format: mrs","    interval: 43200",
+     "    url: https://raw.githubusercontent.com/MetaCubeX/meta-rules-dat/meta/geo/geosite/youtube.mrs"
+   );
+   if(freeOn&&o.freeUseWarp)a.push('    proxy: "WARP中转"');
+   a.push(
      "","rules:",
-     "  - RULE-SET,cn,DIRECT",
-     "  - RULE-SET,cn_ip,DIRECT",
-     "  - MATCH,国外网站",""
+     "  - RULE-SET,youtube,▶️ YouTube高速",
+     "  - RULE-SET,cn,🎯 全球直连",
+     "  - RULE-SET,cn_ip,🎯 全球直连,no-resolve",
+     "  - MATCH,🐟 漏网之鱼",""
    );
    return a;
  }
-
- const groups=[
-   "AI","YouTube","Emby","TikTok","Netflix","Disney","Spotify","GitHub",
-   "Telegram","Google","Twitter","Instagram","Facebook","Apple","Microsoft",
-   "Steam","Xbox","PlayStation","Nintendo","Porn","国外网站","🐟 漏网之鱼"
- ];
- for(const g of groups)appendServiceSelector(a,g,names,o);
- appendServiceSelector(a,"Bilibili",names,o,{directFirst:true});
 
  a.push(
    "",
@@ -620,82 +893,61 @@ function clashGroupsAndRules(names,o){
    "",
    "rule-providers:"
  );
- for(const [tag,url] of CLASH_DOMAIN_RULESETS)a.push(`  ${tag}:`,`    <<: *domain`,`    url: ${url}`);
- for(const [tag,url] of CLASH_IP_RULESETS)a.push(`  ${tag}:`,`    <<: *ip`,`    url: ${url}`);
-
- a.push("","rules:");
-
- if(o.adBlock){
-   a.push(
-     "  - RULE-SET,category-ads-all,REJECT",
-     "  - RULE-SET,ad_ip,REJECT,no-resolve"
-   );
+ for(const [tag,url] of CLASH_DOMAIN_RULESETS){
+   a.push(`  ${tag}:`,`    <<: *domain`,`    url: ${url}`);
+   if(freeOn&&o.freeUseWarp)a.push('    proxy: "WARP中转"');
+ }
+ for(const [tag,url] of CLASH_IP_RULESETS){
+   a.push(`  ${tag}:`,`    <<: *ip`,`    url: ${url}`);
+   if(freeOn&&o.freeUseWarp)a.push('    proxy: "WARP中转"');
  }
 
- // Local egress scanner probe domains.
+ a.push("","rules:");
+ if(o.adBlock){
+   a.push("  - RULE-SET,category-ads-all,🛑 全球拦截","  - RULE-SET,ad_ip,🛑 全球拦截,no-resolve");
+ }
  a.push(
-   "  # 本机出口检测器使用；出口检测组默认 hidden",
-   "  - DOMAIN,ipinfo.io,出口检测",
-   "  - DOMAIN,www.cloudflare.com,出口检测",
-   ""
- );
-
- // OpenAI 官方列出的关键域名显式绑定 AI，避免被其它规则提前接管。
- const chatTarget=o.chatgptRoute||"DIRECT";
- const otherAiTarget=o.otherAiRoute||"AI";
- a.push(
-   `  # ChatGPT / OpenAI 独立出口：${chatTarget}`,
-   `  - DOMAIN-SUFFIX,chatgpt.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,openai.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,oaistatic.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,oaiusercontent.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,oaistatsig.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,openaimerge.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,workos.com,${chatTarget}`,
-   `  - DOMAIN-SUFFIX,workoscdn.com,${chatTarget}`,
-   `  - DOMAIN,challenges.cloudflare.com,${chatTarget}`,
+   "  - RULE-SET,private_ip,🎯 全球直连,no-resolve",
    "",
-   `  # 其它 AI 服务：${otherAiTarget}`,
-   "  # 国内 / 私网",
-   "  - RULE-SET,private_ip,DIRECT,no-resolve",
-   "  - RULE-SET,steam@cn,DIRECT",
-   "  - RULE-SET,microsoft@cn,DIRECT",
-   "  - RULE-SET,nintendo@cn,DIRECT",
-   "  - RULE-SET,bilibili,Bilibili",
+   "  # AI",
+   "  - DOMAIN-SUFFIX,chatgpt.com,🤖 AI",
+   "  - DOMAIN-SUFFIX,openai.com,🤖 AI",
+   "  - DOMAIN-SUFFIX,oaistatic.com,🤖 AI",
+   "  - DOMAIN-SUFFIX,oaiusercontent.com,🤖 AI",
+   "  - RULE-SET,category-ai-!cn,🤖 AI",
    "",
-   "  # AI / 流媒体 / 社交",
-   `  - RULE-SET,category-ai-!cn,${otherAiTarget}`,
-   "  - RULE-SET,youtube,YouTube",
-   "  - RULE-SET,emby,Emby",
-   "  - RULE-SET,tiktok,TikTok",
-   "  - RULE-SET,netflix,Netflix",
-   "  - RULE-SET,disney,Disney",
-   "  - RULE-SET,spotify,Spotify",
-   "  - RULE-SET,github,GitHub",
-   "  - RULE-SET,telegram,Telegram",
-   "  - RULE-SET,google,Google",
-   "  - RULE-SET,twitter,Twitter",
-   "  - RULE-SET,instagram,Instagram",
-   "  - RULE-SET,facebook,Facebook",
-   "  - RULE-SET,apple@cn,DIRECT",
-   "  - RULE-SET,apple,Apple",
-   "  - RULE-SET,microsoft,Microsoft",
-   "  - RULE-SET,steam,Steam",
-   "  - RULE-SET,xbox,Xbox",
-   "  - RULE-SET,playstation,PlayStation",
-   "  - RULE-SET,nintendo,Nintendo",
-   "  - RULE-SET,category-porn,Porn",
+   "  # YouTube",
+   "  - RULE-SET,youtube,▶️ YouTube高速",
    "",
-   "  # IP rules",
-   "  - RULE-SET,apple_ip,Apple,no-resolve",
-   "  - RULE-SET,google_ip,Google,no-resolve",
-   "  - RULE-SET,telegram_ip,Telegram,no-resolve",
-   "  - RULE-SET,netflix_ip,Netflix,no-resolve",
-   "  - RULE-SET,twitter_ip,Twitter,no-resolve",
+   "  # Streaming",
+   "  - RULE-SET,netflix,🎬 流媒体",
+   "  - RULE-SET,netflix_ip,🎬 流媒体,no-resolve",
+   "  - RULE-SET,disney,🎬 流媒体",
+   "  - RULE-SET,primevideo,🎬 流媒体",
+   "  - RULE-SET,hbo,🎬 流媒体",
+   "  - RULE-SET,spotify,🎬 流媒体",
+   "  - RULE-SET,tiktok,🎬 流媒体",
+   "  - RULE-SET,emby,🎬 流媒体",
    "",
-   "  - RULE-SET,geolocation-!cn,国外网站",
-   "  - RULE-SET,cn,DIRECT",
-   "  - RULE-SET,cn_ip,DIRECT",
+   "  # Telegram",
+   "  - RULE-SET,telegram,✈️ 电报信息",
+   "  - RULE-SET,telegram_ip,✈️ 电报信息,no-resolve",
+   "",
+   "  # Microsoft / Apple",
+   "  - RULE-SET,microsoft,Ⓜ️ 微软服务",
+   "  - RULE-SET,apple,🍎 苹果服务",
+   "",
+   "  # Cloudflare",
+   "  - RULE-SET,cloudflare,☁️ CloudflareCDN",
+   "  - RULE-SET,cloudflare_ip,☁️ CloudflareCDN,no-resolve",
+   "",
+   "  # Mainland / local",
+   "  - RULE-SET,bilibili,🎯 全球直连",
+   "  - RULE-SET,cn,🎯 全球直连",
+   "  - RULE-SET,cn_ip,🎯 全球直连,no-resolve",
+   "",
+   "  # Remaining foreign / final",
+   "  - RULE-SET,geolocation-!cn,🌐 国外网站",
    "  - MATCH,🐟 漏网之鱼",
    ""
  );
@@ -705,9 +957,13 @@ function clashGroupsAndRules(names,o){
 function buildClash(){
  if(!source)throw new Error("请先加载原生 config.json");
  const o=opts(),pairs=connectionPairs(),names=[];
+ if(o.customIpEnabled&&o.customIpErrors.length)throw new Error("自定义 IP 分流规则有误："+o.customIpErrors[0]);
+ if(o.customIpEnabled&&!o.freeEnabled&&o.customIpRules.some(r=>["US","JP","SG","HK","TW","KR","FREE"].includes(r.target))){
+   throw new Error("自定义 IP 规则使用了地区/免费出口，但免费落地节点已关闭。请启用免费落地，或把目标改成 WARP / DIRECT。");
+ }
  const a=[
-  `# ${o.profile} - Clash / Mihomo MASQUE v6.7`,
-  "mixed-port: 7890","allow-lan: false","mode: rule","log-level: info","ipv6: true","unified-delay: true"
+  `# ${o.profile} - Clash / Mihomo MASQUE v6.17 Dynamic-Country-Rules`,
+  "mixed-port: 7890","allow-lan: false","mode: rule","log-level: info","ipv6: true","unified-delay: true","tcp-concurrent: true","keep-alive-interval: 15","keep-alive-idle: 15"
  ];
  if(o.enableControllerApi){
    const ctl=controllerHostPort(o.controllerUrl);
@@ -721,6 +977,7 @@ function buildClash(){
   "","proxies:"
  );
  pairs.forEach(([server,port],i)=>{const n=nodeName(server,port,i);names.push(n);makeNode(a,n,server,port,o)});
+ appendFreeProviders(a,o);
  a.push(...clashGroupsAndRules(names,o));
  return a.join("\n");
 }
@@ -889,6 +1146,37 @@ function startCooldown(seconds){
  tick();cooldownTimer=setInterval(tick,1000);
 }
 
+function selectedFreeLabels(){
+ return [
+  $("freeUS").checked?"US":"",
+  $("freeJP").checked?"JP":"",
+  $("freeSG").checked?"SG":"",
+  $("freeHK").checked?"HK":"",
+  $("freeTW").checked?"TW":"",
+  $("freeKR").checked?"KR":""
+ ].filter(Boolean);
+}
+function updateCustomIpRoutingHint(){
+ const enabled=$("customIpRoutingEnabled")?.checked;
+ const box=$("customIpRoutingHint"); if(!box)return;
+ if(!enabled){box.className="custom-ip-hint";box.textContent="当前未启用自定义 IP 分流。";return}
+ const p=parseCustomIpRules($("customIpRoutingRules")?.value||"");
+ if(p.errors.length){box.className="custom-ip-hint error";box.textContent="⚠ "+p.errors[0];return}
+ const regions=p.countries.length?`；涉及地区：${p.countries.join(" / ")}`:"";
+ box.className="custom-ip-hint ok";
+ box.textContent=`✅ 已识别 ${p.rules.length} 条自定义 IP/CIDR 规则${regions}。应用后这些规则优先于通用分流。`;
+}
+
+function updateFreeEgressHint(){
+ const enabled=$("freeEgressEnabled").checked;
+ const countries=selectedFreeLabels();
+ const scope=$("freeScope").selectedOptions?.[0]?.textContent||$("freeScope").value;
+ const chain=$("freeUseWarp").checked?"订阅下载 + 节点连接均经 WARP/MASQUE":"直接下载 / 直接连接免费节点";
+ $("freeEgressHint").textContent=enabled
+   ?`已启用：${scope}；地区：${countries.join(" / ")||"未选择"}；${chain}。`
+   :`当前未启用：生成结果与原版一致。启用后 Clash 会自动拉取所选地区的公开免费节点。`;
+}
+
 function updateChatgptRouteHint(){
  const mode=$("chatgptRouteMode").value;
  const labels={
@@ -915,7 +1203,10 @@ function resetRecommended(){
  $("egressChatgptFirst").checked=true;$("egressApplyAll").checked=false;$("enableControllerApi").checked=true;
  $("nodeTag").value="CDN";$("profileName").value="MASQUE-Pro";$("nodeCountMode").value="13";$("customNodeCount").value="100";$("nodeBuildMode").value="balanced";$("extraEndpoints").value="";$("nodeNaming").value="detail";
  $("udpForward").checked=true;$("remoteDns").checked=true;$("autoSelect").checked=true;$("showIcons").checked=true;$("adBlock").checked=true;$("includeTestEndpoints").checked=true;$("dedupeNodes").checked=true;$("h2ExtendedPool").checked=true;
- syncConditional();updateEstimate();
+ $("freeEgressEnabled").checked=true;$("freeUseWarp").checked=true;$("freeScope").value="ai-streaming";$("freeProtocolMode").value="stable";
+ $("freeUS").checked=true;$("freeJP").checked=true;$("freeSG").checked=true;$("freeHK").checked=false;$("freeTW").checked=false;$("freeKR").checked=false;
+ $("customIpRoutingEnabled").checked=false;$("customIpRoutingRules").value="";
+ syncConditional();updateEstimate();updateFreeEgressHint();updateCustomIpRoutingHint();
 }
 function preset(name){
  resetRecommended();
@@ -941,10 +1232,12 @@ function syncConditional(){
  if($("networkMode").value==="h3-l4proxy")$("udpForward").checked=false;
 }
 
-const selectSettingIds=["endpointPreset","portPreset","sniPreset","dnsPreset","innerIpMode","networkMode","stackMode","ccMode","outerCc","bbrProfile","mtuPreset","handshakeTimeout","ruleMode","healthUrl","healthInterval","healthTolerance","aiHealthMode","chatgptRouteMode","otherAiRouteMode","chatgptDirectFallback","egressCountry1","egressCountry2","egressCountry3","egressChatgptFirst","egressApplyAll","enableControllerApi","nodeCountMode","nodeBuildMode","nodeNaming","udpForward","remoteDns","autoSelect","showIcons","adBlock","includeTestEndpoints","dedupeNodes","h2ExtendedPool"];
+const selectSettingIds=["freeEgressEnabled","freeUseWarp","freeScope","freeProtocolMode","freeUS","freeJP","freeSG","freeHK","freeTW","freeKR","customIpRoutingEnabled","endpointPreset","portPreset","sniPreset","dnsPreset","innerIpMode","networkMode","stackMode","ccMode","outerCc","bbrProfile","mtuPreset","handshakeTimeout","ruleMode","healthUrl","healthInterval","healthTolerance","aiHealthMode","chatgptRouteMode","otherAiRouteMode","chatgptDirectFallback","egressCountry1","egressCountry2","egressCountry3","egressChatgptFirst","egressApplyAll","enableControllerApi","nodeCountMode","nodeBuildMode","nodeNaming","udpForward","remoteDns","autoSelect","showIcons","adBlock","includeTestEndpoints","dedupeNodes","h2ExtendedPool"];
 selectSettingIds.forEach(id=>$(id).addEventListener("change",()=>{
  syncConditional();updateEstimate();
  if(id==="chatgptRouteMode"||id==="otherAiRouteMode")updateChatgptRouteHint();
+ if(["freeEgressEnabled","freeUseWarp","freeScope","freeProtocolMode","freeUS","freeJP","freeSG","freeHK","freeTW","freeKR"].includes(id))updateFreeEgressHint();
+ if(id==="customIpRoutingEnabled")updateCustomIpRoutingHint();
  markDirty(id,true);
  if(id==="nodeCountMode"){
    const target=targetNodeCount(),actual=connectionPairs().length;
@@ -955,8 +1248,12 @@ selectSettingIds.forEach(id=>$(id).addEventListener("change",()=>{
    }
  }
 }));
-const textSettingIds=["customEndpoint","customPort","customSni","customDns","customInner4","customInner6","customMtu","customNodeCount","extraEndpoints","controllerUrl","controllerSecret","localProxyUrl","nodeTag","profileName"];
-textSettingIds.forEach(id=>$(id).addEventListener("change",()=>{updateEstimate();markDirty(id,true)}));
+const textSettingIds=["customIpRoutingRules","customEndpoint","customPort","customSni","customDns","customInner4","customInner6","customMtu","customNodeCount","extraEndpoints","controllerUrl","controllerSecret","localProxyUrl","nodeTag","profileName"];
+textSettingIds.forEach(id=>$(id).addEventListener("change",()=>{
+ if(id==="customIpRoutingRules")updateCustomIpRoutingHint();
+ updateEstimate();
+ markDirty(id,true);
+}));
 
 $("presetRecommended").addEventListener("click",()=>preset("recommended"));
 $("presetIpv4").addEventListener("click",()=>preset("ipv4"));
@@ -969,7 +1266,8 @@ $("applySettings").addEventListener("click",()=>{
  try{
   const target=currentFormat==="native"?"clash":currentFormat;setFormat(target);
   const n=connectionPairs().length,targetCount=targetNodeCount();settingsDirty=false;
-  setSettingsState("clean",`✅ 设置已成功应用 · ${n} 个节点 · ChatGPT → ${$("chatgptRouteMode").selectedOptions[0].textContent}`);
+  const landing=$("freeEgressEnabled").checked?` · 免费落地 ${selectedFreeLabels().join("/")||"未选地区"}`:" · WARP-only";
+  setSettingsState("clean",`✅ 设置已成功应用 · ${n} 个 WARP 节点${landing}`);
   if(n<targetCount){
     toast(`设置已应用。目标 ${targetCount} 个，当前可生成 ${n} 个唯一节点；没有复制重复节点。`,"warning","重新生成完成");
   }else{
@@ -1021,5 +1319,5 @@ $("downloadEgressConfig").addEventListener("click",()=>{
   download("warp-egress-preference.json",JSON.stringify(egressPreferences(),null,2),"application/json");
 });
 
-resetRecommended();syncConditional();updateEstimate();setSettingsState("clean","当前设置已应用");
+resetRecommended();syncConditional();updateEstimate();updateFreeEgressHint();updateCustomIpRoutingHint();setSettingsState("clean","当前设置已应用");
 })();

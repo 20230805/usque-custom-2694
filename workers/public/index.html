@@ -4,20 +4,20 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Usque MASQUE 高级转换中心：一键注册、原生配置、多端点/多端口/SNI/DNS自定义、Clash/Mihomo智能分流、Shadowrocket、sing-box与VLESS桥接。">
-  <title>Usque MASQUE Pro 转换中心</title>
-  <link rel="stylesheet" href="./style.css?v=67">
+  <meta name="description" content="Usque MASQUE 小白友好转换工具：网页一键注册并保存原生 config.json，再生成 Clash/Mihomo 智能分流；可选 US/JP/SG 等公开免费落地节点，并通过 WARP/MASQUE 中转连接。">
+  <title>Usque MASQUE · 免费落地节点池</title>
+  <link rel="stylesheet" href="./style.css?v=617">
 </head>
 <body>
 <main class="wrap pro-wrap">
   <header class="hero pro-hero">
-    <span class="badge">v6.7 PRO · Pages + Workers 双部署</span>
-    <h1>MASQUE To Clash Pro</h1>
-    <p>Usque 一键注册 → 高级自定义 → 多格式导出 · 支持 Pages / Workers</p>
+    <span class="badge">v6.17 · 动态地区规则 + 完整策略组</span>
+    <h1>Usque MASQUE → Clash 小白版</h1>
+    <p>一键注册并保存原生 config.json → 选择免费落地地区 → WARP 中转 → 下载 Clash</p>
     <div class="tip">
       <b>本地优先：</b>原生 <code>config.json</code> 是唯一源文件。注册成功后请保存；之后改端点、端口、SNI、DNS、
       分流或输出格式，都可以直接复用，不需要重新注册。<br>
-      <b>部署：</b>v6.7 同时提供 Cloudflare Pages 与 Workers Static Assets 两套目录。
+      <b>部署：</b>保持原项目不变：Cloudflare Pages 仍然使用 <code>pages/</code> 根目录，原视频教程无需重录。
     </div>
   </header>
 
@@ -99,11 +99,123 @@
     <div class="step-title">
       <span class="num">3</span>
       <div>
-        <h2>高级自定义设置</h2>
-        <p>默认已经适合新手；需要时再调整。功能覆盖你截图里的项目，并增加节点数量模式、附加 Endpoint、节点去重、健康检查、规则模式和完整操作反馈。</p>
+        <h2>分流设置</h2>
+        <p>分流已精简：只保留 AI、流媒体、国外网站 3 个主策略组；Netflix / Disney / Prime Video / HBO / Spotify / TikTok / Emby 统一进入“流媒体”。</p>
       </div>
     </div>
 
+
+    <div class="free-egress-panel">
+      <div class="free-egress-head">
+        <div>
+          <h3>🌍 免费落地节点池（Beta）</h3>
+          <p>无需注册 VPN 账户，也不需要 Manager / EXE。节点来自公开第三方订阅，Mihomo 自动下载、测速，并可统一经过 WARP / MASQUE 中转。</p>
+        </div>
+        <span class="simple-badge">小白测试</span>
+      </div>
+
+      <div class="free-warning">
+        ⚠️ <b>安全提醒：</b>这些是第三方公开免费节点，只适合普通网页、AI/流媒体连通性测试。不要用于网银、重要账号登录、密码或敏感数据传输。
+      </div>
+      <div class="free-default-note">
+        <b>默认出口：</b>AI / 流媒体走 <code>免费节点 → WARP/MASQUE 中转</code>；YouTube / 普通国外网站优先 <code>WARP</code>；国内 <code>DIRECT</code>。取消“启用免费落地节点”后恢复 WARP-only。
+      </div>
+
+      <div class="free-egress-grid">
+        <label class="switch-pro free-master">
+          <input id="freeEgressEnabled" type="checkbox" checked>
+          <span>启用免费落地节点</span>
+        </label>
+
+        <label class="switch-pro">
+          <input id="freeUseWarp" type="checkbox" checked>
+          <span>订阅下载 + 节点连接都经过 WARP / MASQUE（推荐）</span>
+        </label>
+
+        <label>
+          <span>哪些服务走免费落地</span>
+          <select id="freeScope">
+            <option value="ai-streaming" selected>AI + 全部流媒体（Netflix/Disney/Prime/HBO/TikTok/Spotify）（推荐）</option>
+            <option value="ai-only">仅 AI / ChatGPT / OpenAI</option>
+            <option value="streaming-only">仅 Netflix/Disney + TikTok/Spotify</option>
+            <option value="all-foreign">全部国外出口（实验，速度可能下降）</option>
+          </select>
+        </label>
+
+        <label>
+          <span>协议筛选</span>
+          <select id="freeProtocolMode">
+            <option value="stable" selected>稳定优先：VLESS / VMess / Trojan / SS</option>
+            <option value="all">全部协议（实验）</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="country-select">
+        <b>选择落地地区：</b>
+        <label><input id="freeUS" type="checkbox" checked> 🇺🇸 美国 US</label>
+        <label><input id="freeJP" type="checkbox" checked> 🇯🇵 日本 JP</label>
+        <label><input id="freeSG" type="checkbox" checked> 🇸🇬 新加坡 SG</label>
+        <label><input id="freeHK" type="checkbox"> 🇭🇰 香港 HK</label>
+        <label><input id="freeTW" type="checkbox"> 🇹🇼 台湾 TW</label>
+        <label><input id="freeKR" type="checkbox"> 🇰🇷 韩国 KR</label>
+      </div>
+
+      <div class="dynamic-country-note">
+        <b>🌍 动态地区规则：</b>
+        上面勾选哪些地区，生成到 Clash 的策略组里就只出现哪些地区。
+        例如只勾 <code>US + SG</code>，AI / 流媒体 / YouTube / 国外网站 / Telegram 等规则中就只提供
+        <code>🇺🇸 US</code>、<code>🇸🇬 SG</code> 两个地区入口。
+      </div>
+      <div class="hidden" aria-hidden="true">
+        <input id="customIpRoutingEnabled" type="checkbox">
+        <textarea id="customIpRoutingRules"></textarea>
+        <div id="customIpRoutingHint"></div>
+      </div>
+
+      <div class="clean-routing-note priority-note">
+        <b>默认优选顺序：</b>
+        <span>① ✅ 能否正常访问（硬门槛）</span>
+        <span>② ⚡ 速度 / 延迟</span>
+        <span>③ 🛡️ 稳定性（同速时尽量不切换）</span>
+        <span>AI / 流媒体使用独立健康检查，不再只测普通 204</span>
+      </div>
+      <div class="youtube-note">
+        <b>▶️ YouTube 速度优先：</b>
+        默认走 <code>⚡ YouTube-WARP极速</code>，避免公共免费节点拖慢 4K/8K；需要时可手动切到混合竞速或免费落地。
+        仍可手动切换 <code>🌎 WARP可手动</code>、<code>🌍 免费落地可手动</code> 或 <code>DIRECT</code>。
+      </div>
+      <div class="free-flow">
+        <span>① 一键注册 WARP</span>
+        <span>② 勾选免费落地</span>
+        <span>③ 应用设置</span>
+        <span>④ 下载 Clash YAML</span>
+        <span>⑤ Clash 自动拉取节点</span>
+      </div>
+
+      <div class="free-groups-preview">
+        <div><b>🤖 AI 自动优选</b><small>ChatGPT 可达性测速</small></div>
+        <div><b>⚡ 免费落地自动</b><small>按当前网络实时延迟选最快</small></div>
+        <div><b>🌍 免费落地可手动</b><small>显示国家前缀，可手动切换</small></div>
+      </div>
+
+      <div id="freeEgressHint" class="free-note">
+        默认已启用混合高速：AI / 流媒体优先免费落地；YouTube / 普通国外网站优先 WARP。关闭免费落地后自动恢复 WARP-only。
+      </div>
+
+      <details class="free-source-details">
+        <summary>查看节点来源与说明</summary>
+        <div>
+          <p>主源：<code>Au1rxx/free-vpn-subscriptions</code>。按国家提供 Clash YAML，并持续自动更新。</p>
+          <p>默认稳定模式会排除 Hysteria2 / TUIC / WireGuard / HTTP / SOCKS 等，更优先测试 VLESS / VMess / Trojan / Shadowsocks。</p>
+          <a href="https://github.com/Au1rxx/free-vpn-subscriptions" target="_blank" rel="noopener">打开节点源项目</a>
+        </div>
+      </details>
+    </div>
+
+    <details class="advanced-settings">
+      <summary>⚙️ MASQUE 高级设置（一般不用改）</summary>
+      <div class="advanced-settings-body">
     <div class="preset-row pro-presets">
       <button id="presetRecommended" class="preset active" type="button">⭐ 新手推荐</button>
       <button id="presetIpv4" class="preset" type="button">IPv4 稳定</button>
@@ -411,7 +523,10 @@
       <label class="switch-pro"><input id="h2ExtendedPool" type="checkbox" checked><span>H2 扩展地址池（100～500 节点）</span></label>
     </div>
 
-    <div class="ai-simple-panel">
+      </div>
+    </details>
+
+    <div class="ai-simple-panel legacy-hidden">
       <div class="ai-simple-head">
         <div>
           <h3>🤖 ChatGPT / OpenAI 最简单出口设置</h3>
@@ -453,7 +568,7 @@
       </div>
     </div>
 
-    <details class="egress-advanced">
+    <details class="egress-advanced legacy-hidden">
       <summary>🌍 高级：WARP 出口国家 / 地区检测与优选（可选）</summary>
       <div class="egress-panel">
       <div class="egress-title">
@@ -573,8 +688,8 @@
     <div class="step-title">
       <span class="num">4</span>
       <div>
-        <h2>转换 / 导出</h2>
-        <p>同一份原生 Usque 配置可以随时切换输出格式。</p>
+        <h2>下载配置</h2>
+        <p>新手推荐直接选择 Clash / Mihomo；其它格式仍然完整保留。</p>
       </div>
     </div>
 
@@ -627,7 +742,7 @@
 
 <div id="toastStack" class="toast-stack" aria-live="polite" aria-atomic="true"></div>
 
-<script src="./usque-register.js?v=67"></script>
-<script src="./app.js?v=67"></script>
+<script src="./usque-register.js?v=617"></script>
+<script src="./app.js?v=617"></script>
 </body>
 </html>
